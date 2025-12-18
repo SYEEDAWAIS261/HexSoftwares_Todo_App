@@ -67,11 +67,11 @@ const Home = () => {
   const timeGreeting = useMemo(() => {
     const currentHour = new Date().getHours();
     if (currentHour < 12 && currentHour >= 5) {
-      return "Good morning";
+      return "Good morning SYNTECXHUB Task-2";
     } else if (currentHour < 18 && currentHour > 12) {
-      return "Good afternoon";
+      return "Good afternoon SYNTECXHUB Task-2";
     } else {
-      return "Good evening";
+      return "Good evening SYNTECXHUB Task-2";
     }
   }, []);
 

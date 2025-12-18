@@ -1,16 +1,15 @@
-import { keyframes, useTheme } from "@emotion/react";
+import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import {
   AccessTimeFilledRounded,
   AddRounded,
-  AdjustRounded,
+  // AdjustRounded,
   BugReportRounded,
   CategoryRounded,
   DeleteForeverRounded,
   DownloadDoneRounded,
   Favorite,
-  FavoriteRounded,
-  FiberManualRecord,
+  // FiberManualRecord,
   GetAppRounded,
   GitHub,
   InstallDesktopRounded,
@@ -20,7 +19,7 @@ import {
   PhoneIphoneRounded,
   PhonelinkRounded,
   SettingsRounded,
-  StarRounded,
+  // StarRounded,
   TaskAltRounded,
   ThumbUpRounded,
 } from "@mui/icons-material";
@@ -37,13 +36,9 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CustomDialogTitle, LogoutDialog, SettingsDialog } from ".";
-import bmcLogoLight from "../assets/bmc-logo-light.svg";
-import bmcLogo from "../assets/bmc-logo.svg";
 import { defaultUser } from "../constants/defaultUser";
 import { UserContext } from "../contexts/UserContext";
-import { fetchBMCInfo } from "../services/bmcApi";
-import { fetchGitHubInfo } from "../services/githubApi";
-import { DialogBtn, UserAvatar, pulseAnimation, reduceMotion, ring } from "../styles";
+import { DialogBtn, UserAvatar, reduceMotion, ring } from "../styles";
 import { ColorPalette } from "../theme/themeConfig";
 import {
   getProfilePictureFromDB,
@@ -60,38 +55,7 @@ export const ProfileSidebar = () => {
   const open = Boolean(anchorEl);
   const [openLogoutDialog, setOpenLogoutDialog] = useState<boolean>(false);
   const [openSettings, setOpenSettings] = useState<boolean>(false);
-
-  const [stars, setStars] = useState<number | null>(null);
-  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
-  const [issuesCount, setIssuesCount] = useState<number | null>(null);
-
-  const [bmcSupporters, setBmcSupporters] = useState<number | null>(null);
-
-  const theme = useTheme();
   const n = useNavigate();
-
-  useEffect(() => {
-    const fetchRepoInfo: () => Promise<void> = async () => {
-      const { repoData, branchData } = await fetchGitHubInfo();
-      setStars(repoData.stargazers_count);
-      setLastUpdate(branchData.commit.commit.committer.date);
-      setIssuesCount(repoData.open_issues_count);
-    };
-
-    const fetchBMC: () => Promise<void> = async () => {
-      // Fetch data from the Buy Me a Coffee API
-      const { supportersCount } = await fetchBMCInfo();
-      // In case BMC api fails
-      if (supportersCount > 0) {
-        setBmcSupporters(supportersCount);
-      } else {
-        console.error("No BMC supporters found.");
-      }
-    };
-
-    fetchBMC();
-    fetchRepoInfo();
-  }, []);
 
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
 
@@ -113,17 +77,13 @@ export const ProfileSidebar = () => {
 
   interface BeforeInstallPromptEvent extends Event {
     readonly platforms: ReadonlyArray<string>;
-    readonly userChoice: Promise<{
-      outcome: "accepted" | "dismissed";
-      platform: string;
-    }>;
+    readonly userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
     prompt(): Promise<void>;
   }
 
   const [supportsPWA, setSupportsPWA] = useState<boolean>(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isAppInstalled, setIsAppInstalled] = useState<boolean>(false);
-
   const [openInstalledDialog, setOpenInstalledDialog] = useState<boolean>(false);
 
   useEffect(() => {
@@ -152,22 +112,8 @@ export const ProfileSidebar = () => {
       deferredPrompt.prompt();
       deferredPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === "accepted") {
-          // if ("setAppBadge" in navigator) {
-          //   setUser((prevUser) => ({
-          //     ...prevUser,
-          //     settings: {
-          //       ...prevUser.settings,
-          //       appBadge: true,
-          //     },
-          //   }));
-          // }
-
-          // Show a dialog to inform the user that the app is now running as a PWA on Windows
-          if (systemInfo.os === "Windows") {
-            setOpenInstalledDialog(true);
-          } else {
-            showToast("App installed successfully!");
-          }
+          if (systemInfo.os === "Windows") setOpenInstalledDialog(true);
+          else showToast("App installed successfully!");
           handleClose();
         }
         if (choiceResult.outcome === "dismissed") {
@@ -176,25 +122,6 @@ export const ProfileSidebar = () => {
       });
     }
   };
-
-  // const avatarButtonRef = useRef<HTMLButtonElement | null>(null);
-
-  // useEffect(() => {
-  //   const handleKeyDown = (e: KeyboardEvent) => {
-  //     if (e.repeat) return;
-  //     if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "b") {
-  //       e.preventDefault();
-  //       if (open) {
-  //         setAnchorEl(null);
-  //       } else if (avatarButtonRef.current) {
-  //         setAnchorEl(avatarButtonRef.current);
-  //       }
-  //     }
-  //   };
-
-  //   document.addEventListener("keydown", handleKeyDown);
-  //   return () => document.removeEventListener("keydown", handleKeyDown);
-  // }, [open]);
 
   return (
     <Container>
@@ -218,12 +145,8 @@ export const ProfileSidebar = () => {
             }
             size="52px"
             onError={() => {
-              // This prevents the error handling from being called unnecessarily when offline
               if (!navigator.onLine) return;
-              setUser((prevUser) => ({
-                ...prevUser,
-                profilePicture: null,
-              }));
+              setUser((prevUser) => ({ ...prevUser, profilePicture: null }));
               showToast("Error in profile picture URL", { type: "error" });
               throw new Error("Error in profile picture URL");
             }}
@@ -232,6 +155,7 @@ export const ProfileSidebar = () => {
           </UserAvatar>
         </IconButton>
       </Tooltip>
+
       <StyledSwipeableDrawer
         disableBackdropTransition={systemInfo.os !== "iOS"}
         disableDiscovery={systemInfo.os === "iOS"}
@@ -250,8 +174,7 @@ export const ProfileSidebar = () => {
         >
           <Logo src="/logo192.png" alt="logo" />
           <LogoText>
-            <span>Todo</span> App
-            <span>.</span>
+            <span>Todo</span> App<span>.</span>
           </LogoText>
         </LogoContainer>
 
@@ -276,7 +199,7 @@ export const ProfileSidebar = () => {
           </StyledMenuItem>
         </MenuLink>
 
-        {settings.enableCategories !== undefined && settings.enableCategories && (
+        {settings.enableCategories && (
           <MenuLink to="/categories">
             <StyledMenuItem onClick={handleClose}>
               <CategoryRounded /> &nbsp; Categories
@@ -314,52 +237,15 @@ export const ProfileSidebar = () => {
 
         <StyledDivider />
 
-        <MenuLink to="https://github.com/maciekt07/TodoApp">
+        <MenuLink to="https://github.com/SYEEDAWAIS261/Todo-App">
           <StyledMenuItem translate="no">
-            <GitHub className="GitHubIcon" /> &nbsp; Github{" "}
-            {stars && (
-              <Tooltip title={`${stars} stars on Github`}>
-                <MenuLabel clr="#ff9d00">
-                  <span>
-                    <StarRounded style={{ fontSize: "18px" }} />
-                    {stars}
-                  </span>
-                </MenuLabel>
-              </Tooltip>
-            )}
+            <GitHub /> &nbsp; Github
           </StyledMenuItem>
         </MenuLink>
 
-        <MenuLink to="https://github.com/maciekt07/TodoApp/issues/new">
+        <MenuLink to="https://github.com/SYEEDAWAIS261/Todo-App/issues/new">
           <StyledMenuItem>
-            <BugReportRounded className="BugReportRoundedIcon" /> &nbsp; Report Issue{" "}
-            {Boolean(issuesCount || issuesCount === 0) && (
-              <Tooltip title={`${issuesCount} open issues`}>
-                <MenuLabel clr="#3bb61c">
-                  <span>
-                    <AdjustRounded style={{ fontSize: "18px" }} />
-                    {issuesCount}
-                  </span>
-                </MenuLabel>
-              </Tooltip>
-            )}
-          </StyledMenuItem>
-        </MenuLink>
-
-        <MenuLink to="https://www.buymeacoffee.com/maciekt07">
-          <StyledMenuItem className="bmcMenu">
-            <BmcIcon className="bmc-icon" src={theme.darkmode ? bmcLogoLight : bmcLogo} /> &nbsp;
-            Buy me a coffee{" "}
-            {bmcSupporters && (
-              <Tooltip title={`${bmcSupporters} supporters on Buy me a coffee`}>
-                <MenuLabel clr="#f93c58">
-                  <span>
-                    <FavoriteRounded style={{ fontSize: "16px" }} />
-                    {bmcSupporters}
-                  </span>
-                </MenuLabel>
-              </Tooltip>
-            )}
+            <BugReportRounded /> &nbsp; Report Issue
           </StyledMenuItem>
         </MenuLink>
 
@@ -367,11 +253,7 @@ export const ProfileSidebar = () => {
 
         {supportsPWA && !isAppInstalled && (
           <StyledMenuItem tabIndex={0} onClick={installPWA}>
-            {systemInfo.os === "Android" ? (
-              <InstallMobileRounded />
-            ) : (
-              <InstallDesktopRounded className="InstallDesktopRoundedIcon" />
-            )}
+            {systemInfo.os === "Android" ? <InstallMobileRounded /> : <InstallDesktopRounded />}
             &nbsp; Install App
           </StyledMenuItem>
         )}
@@ -393,8 +275,7 @@ export const ProfileSidebar = () => {
                 handleClose();
               }}
             >
-              <PhoneIphoneRounded />
-              &nbsp; Install App
+              <PhoneIphoneRounded /> &nbsp; Install App
             </StyledMenuItem>
           )}
 
@@ -406,7 +287,7 @@ export const ProfileSidebar = () => {
           }}
           sx={{ color: "#ff4040 !important" }}
         >
-          <Logout className="LogoutIcon" /> &nbsp; Logout
+          <Logout /> &nbsp; Logout
         </StyledMenuItem>
 
         <ProfileOptionsBottom>
@@ -417,14 +298,11 @@ export const ProfileSidebar = () => {
               handleClose();
             }}
           >
-            <SettingsRounded className="SettingsRoundedIcon" /> &nbsp; Settings
-            {JSON.stringify(settings) === JSON.stringify(defaultUser.settings) &&
-              user.darkmode === defaultUser.darkmode &&
-              user.theme === defaultUser.theme &&
-              user.emojisStyle === defaultUser.emojisStyle && <PulseMenuLabel />}
+            <SettingsRounded /> &nbsp; Settings
           </SettingsMenuItem>
 
           <StyledDivider />
+
           <MenuLink to="/user">
             <ProfileMenuItem translate={name ? "no" : "yes"} onClick={handleClose}>
               <UserAvatar
@@ -434,8 +312,7 @@ export const ProfileSidebar = () => {
               >
                 {name ? name[0].toUpperCase() : undefined}
               </UserAvatar>
-              <h4 style={{ margin: 0, fontWeight: 600 }}> {name || "User"}</h4>{" "}
-              {(name === null || name === "") && profilePicture === null && <PulseMenuLabel />}
+              <h4 style={{ margin: 0, fontWeight: 600 }}> {name || "User"}</h4>
             </ProfileMenuItem>
           </MenuLink>
 
@@ -449,23 +326,10 @@ export const ProfileSidebar = () => {
             <span style={{ marginLeft: "6px", marginRight: "4px" }}>by</span>
             <a
               style={{ textDecoration: "none", color: "inherit" }}
-              href="https://github.com/maciekt07"
+              href="https://github.com/SYEEDAWAIS261"
             >
-              maciekt07
+              SYEEDAWAIS261
             </a>
-          </CreditsContainer>
-          <CreditsContainer>
-            {lastUpdate && (
-              <Tooltip title={timeAgo(new Date(lastUpdate))}>
-                <span>
-                  Last update:{" "}
-                  {new Intl.DateTimeFormat(navigator.language, {
-                    dateStyle: "long",
-                    timeStyle: "medium",
-                  }).format(new Date(lastUpdate))}
-                </span>
-              </Tooltip>
-            )}
           </CreditsContainer>
         </ProfileOptionsBottom>
       </StyledSwipeableDrawer>
@@ -487,6 +351,7 @@ export const ProfileSidebar = () => {
           </DialogBtn>
         </DialogActions>
       </Dialog>
+
       <LogoutDialog open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)} />
       <SettingsDialog
         open={openSettings}
@@ -496,6 +361,9 @@ export const ProfileSidebar = () => {
     </Container>
   );
 };
+
+// Styled components & MenuLink remain the same as your original code
+// ... (No BMC-related code here)
 
 const MenuLink = ({ to, children }: { to: string; children: React.ReactNode }) => {
   const styles: React.CSSProperties = { borderRadius: "14px" };
@@ -515,21 +383,21 @@ const MenuLink = ({ to, children }: { to: string; children: React.ReactNode }) =
   );
 };
 
-const PulseMenuLabel = () => {
-  return (
-    <StyledPulseMenuLabel>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <FiberManualRecord style={{ fontSize: "16px" }} />
-      </div>
-    </StyledPulseMenuLabel>
-  );
-};
+// const PulseMenuLabel = () => {
+//   return (
+//     <StyledPulseMenuLabel>
+//       <div
+//         style={{
+//           display: "flex",
+//           alignItems: "center",
+//           justifyContent: "center",
+//         }}
+//       >
+//         <FiberManualRecord style={{ fontSize: "16px" }} />
+//       </div>
+//     </StyledPulseMenuLabel>
+//   );
+// };
 
 // TODO: make avatar sticky on pages with TopBar.tsx
 
@@ -696,12 +564,12 @@ const StyledDivider = styled(Divider)`
   margin: 8px 4px;
 `;
 
-const StyledPulseMenuLabel = styled(MenuLabel)`
-  animation: ${({ theme }) => pulseAnimation(theme.primary, 6)} 1.2s infinite;
-  padding: 6px;
-  margin-right: 4px;
-  ${({ theme }) => reduceMotion(theme)}
-`;
+// const StyledPulseMenuLabel = styled(MenuLabel)`
+//   animation: ${({ theme }) => pulseAnimation(theme.primary, 6)} 1.2s infinite;
+//   padding: 6px;
+//   margin-right: 4px;
+//   ${({ theme }) => reduceMotion(theme)}
+// `;
 
 const LogoContainer = styled.div`
   display: flex;
@@ -726,11 +594,11 @@ const LogoText = styled.h2`
   }
 `;
 
-const BmcIcon = styled.img`
-  width: 1em;
-  height: 1em;
-  font-size: 1.5rem;
-`;
+// const BmcIcon = styled.img`
+//   width: 1em;
+//   height: 1em;
+//   font-size: 1.5rem;
+// `;
 
 const ProfileOptionsBottom = styled.div`
   margin-top: auto;

@@ -1,6 +1,6 @@
 import { Box, Divider, FormGroup, FormLabel, Link, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import baner from "../../../assets/baner.webp";
+import baner from "../../../../src/assets/baner.png";
 import { Inventory2Rounded } from "@mui/icons-material";
 import { systemInfo } from "../../../utils";
 
@@ -24,9 +24,13 @@ export default function AboutTab() {
       </Typography>
       <img src={baner} style={{ width: "100%", height: "auto" }} alt="Todo App Screenshot" />
       <Typography variant="caption" sx={{ display: "block", mt: 2 }}>
-        Created by <Link href="https://github.com/maciekt07">maciekt07</Link> <br />
+        Created by <Link href="https://github.com/SYEEDAWAIS261">SYEEDAWAIS261</Link> <br />
         Explore the project on GitHub:{" "}
-        <Link href="https://github.com/maciekt07/TodoApp" target="_blank" rel="noopener noreferrer">
+        <Link
+          href="https://github.com/SYEEDAWAIS261/Todo-App"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Todo App Repository
         </Link>
       </Typography>
